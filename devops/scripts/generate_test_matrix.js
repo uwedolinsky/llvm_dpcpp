@@ -1,30 +1,12 @@
 module.exports = ({core, process}) => {
   const fs = require('fs');
-  fs.readFile('./test_configs.json', 'utf8', (err, data) => {
+  fs.readFile('./devops/test_configs.json', 'utf8', (err, data) => {
     if (err) {
       console.error(`Error reading file from disk: ${err}`);
     } else {
-      const driverNew =
-          JSON.parse(fs.readFileSync('./dependencies.json', 'utf8'));
-      const driverOld =
-          JSON.parse(fs.readFileSync('./dependencies.sycl.json', 'utf8'));
       const testConfigs = JSON.parse(data);
       const inputs = JSON.parse(process.env.GHA_INPUTS);
-      const needsDrivers =
-          driverNew["linux"]["compute_runtime"]["version"] !==
-              driverOld["linux"]["compute_runtime"]["version"] ||
-          driverNew["linux"]["igc"]["version"] !==
-              driverOld["linux"]["igc"]["version"] ||
-          driverNew["linux"]["cm"]["version"] !==
-              driverOld["linux"]["cm"]["version"] ||
-          driverNew["linux"]["level_zero"]["version"] !==
-              driverOld["linux"]["level_zero"]["version"] ||
-          driverNew["linux"]["tbb"]["version"] !==
-              driverOld["linux"]["tbb"]["version"] ||
-          driverNew["linux"]["oclcpu"]["version"] !==
-              driverOld["linux"]["oclcpu"]["version"] ||
-          driverNew["linux"]["fpgaemu"]["version"] !==
-              driverOld["linux"]["fpgaemu"]["version"];
+      const needsDrivers = inputs.drivers_update_needed == 'true';
 
       const ltsConfigs = inputs.lts_config.split(';');
 
@@ -36,21 +18,6 @@ module.exports = ({core, process}) => {
 
       testConfigs.lts.forEach(v => {
         if (ltsConfigs.includes(v.config)) {
-          if (needsDrivers) {
-            v["env"] = {
-              "compute_runtime_tag" :
-                  driverNew["linux"]["compute_runtime"]["github_tag"],
-              "igc_tag" : driverNew["linux"]["igc"]["github_tag"],
-              "cm_tag" : driverNew["linux"]["cm"]["github_tag"],
-              "level_zero_tag" : driverNew["linux"]["level_zero"]["github_tag"],
-              "tbb_tag" : driverNew["linux"]["tbb"]["github_tag"],
-              "cpu_tag" : driverNew["linux"]["oclcpu"]["github_tag"],
-              "fpgaemu_tag" : driverNew["linux"]["fpgaemu"]["github_tag"],
-            };
-          } else {
-            v["env"] = {};
-          }
-
           // Check for CUDA machines. If available, add them to
           // enabledLTSLxConfigs.
           var hasCuda = false;
@@ -106,20 +73,6 @@ module.exports = ({core, process}) => {
 
       testConfigs.cts.forEach(v => {
         if (ctsConfigs.includes(v.config)) {
-          if (needsDrivers) {
-            v["env"] = {
-              "compute_runtime_tag" :
-                  driverNew["linux"]["compute_runtime"]["github_tag"],
-              "igc_tag" : driverNew["linux"]["igc"]["github_tag"],
-              "cm_tag" : driverNew["linux"]["cm"]["github_tag"],
-              "level_zero_tag" : driverNew["linux"]["level_zero"]["github_tag"],
-              "tbb_tag" : driverNew["linux"]["tbb"]["github_tag"],
-              "cpu_tag" : driverNew["linux"]["oclcpu"]["github_tag"],
-              "fpgaemu_tag" : driverNew["linux"]["fpgaemu"]["github_tag"],
-            };
-          } else {
-            v["env"] = {};
-          }
           enabledCTSConfigs.push(v);
         }
       });

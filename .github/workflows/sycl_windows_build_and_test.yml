@@ -134,7 +134,6 @@ jobs:
         include: ${{ fromJSON(inputs.lts_matrix) }}
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.runs-on }}
-    env: ${{ matrix.env }}
     steps:
     - uses: ilammy/msvc-dev-cmd@7315a94840631165970262a99c72cfb48a65d25d
       with:

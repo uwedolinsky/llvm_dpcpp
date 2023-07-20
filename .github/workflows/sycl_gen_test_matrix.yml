@@ -33,6 +33,11 @@ on:
         type: string
         required: false
         default: ${{ github.sha }}
+      drivers_update_needed:
+        description: "True indicates that dependencies.json has changed"
+        type: string
+        required: false
+        default: false
     outputs:
       lts_lx_matrix:
         description: "Linux LTS"
@@ -58,14 +63,12 @@ jobs:
       cts_matrix: ${{ steps.work.outputs.cts_matrix }}
       lts_aws_matrix: ${{ steps.work.outputs.lts_aws_matrix }}
     steps:
-    - name: Download scripts and configs
-      shell: bash
-      run: |
-        wget raw.githubusercontent.com/intel/llvm/${{ inputs.ref }}/devops/scripts/generate_test_matrix.js
-        wget raw.githubusercontent.com/intel/llvm/${{ inputs.ref }}/devops/test_configs.json
-        wget raw.githubusercontent.com/intel/llvm/sycl/devops/dependencies.json
-        mv dependencies.json dependencies.sycl.json
-        wget raw.githubusercontent.com/intel/llvm/${{ inputs.ref }}/devops/dependencies.json
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.ref }}
+        sparse-checkout: |
+          devops/scripts/generate_test_matrix.js
+          devops/test_configs.json
     - id: work
       uses: actions/github-script@v6
       name: Generate matrix
@@ -73,7 +76,5 @@ jobs:
         GHA_INPUTS: ${{ toJSON(inputs) }}
       with:
         script: |
-          const script = require('./generate_test_matrix.js');
+          const script = require('./devops/generate_test_matrix.js');
           script({core, process});
-    - name: Cleanup
-      run: rm -rf generate_test_matrix.js test_configs.json dependencies.json dependencies.sycl.json

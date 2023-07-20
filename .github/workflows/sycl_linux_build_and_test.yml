@@ -98,6 +98,8 @@ on:
         type: choice
         options:
           - "[]"
+          # Use this to test drivers installation:
+          - "[drivers]"
           - '[llvm, clang, sycl, llvm_spirv, xptifw, libclc, libdevice]'
 
       retention-days:
@@ -117,6 +119,8 @@ jobs:
     with:
       ref: ${{ inputs.build_ref || github.sha }}
       lts_config: ${{ inputs.lts_config }}
+      drivers_update_needed: ${{ contains(inputs.changes, 'drivers') }}
+
 
   build:
     needs: [test_matrix]
@@ -287,12 +291,11 @@ jobs:
       ref: ${{ inputs.build_ref || github.sha }}
       merge_ref: ${{ inputs.merge_ref }}
       reset_gpu: ${{ contains(matrix.runs-on, 'gen12') && contains(matrix.runs-on, 'Linux') }}
+      install_drivers: ${{ contains(inputs.changes, 'drivers') && (contains(matrix.runs-on, 'gen12') || contains(matrix.runs-on, 'x86-cpu'))}}
 
       sycl_toolchain_artifact: sycl_linux_${{ inputs.build_artifact_suffix }}
       sycl_toolchain_archive: ${{ needs.build.outputs.artifact_archive_name }}
       sycl_toolchain_decompress_command: ${{ needs.build.outputs.artifact_decompress_command }}
-
-      env: ${{ toJSON(matrix.env) }}
 
   khronos_sycl_cts:
     needs: [test_matrix, build]
@@ -313,12 +316,11 @@ jobs:
       ref: ${{ inputs.build_ref || github.sha }}
       merge_ref: ${{ inputs.merge_ref }}
       reset_gpu: ${{ contains(matrix.runs-on, 'gen12') && contains(matrix.runs-on, 'Linux') }}
+      install_drivers: ${{ contains(inputs.changes, 'drivers') && (contains(matrix.runs-on, 'gen12') || contains(matrix.runs-on, 'x86-cpu'))}}
 
       sycl_toolchain_artifact: sycl_linux_${{ inputs.build_artifact_suffix }}
       sycl_toolchain_archive: ${{ inputs.artifact_archive_name }}
       sycl_toolchain_decompress_command: ${{ inputs.artifact_decompress_command }}
-
-      env: ${{ toJSON(matrix.env) }}
 
   aws-stop:
     name: Stop AWS
