@@ -1,0 +1,23 @@
+name: Test aws action
+
+on:
+  push
+
+jobs:
+  aws_start:
+    name: AWS Start
+    uses: ./.github/workflows/aws.yml
+    secrets: inherit
+    with:
+      mode: start
+      runs-on-list: '[{"runs-on":"aws-cuda_${{ github.run_id }}-${{ github.run_attempt }}","aws-ami":"ami-01cb0573cb039ab24","aws-type":["g5.2xlarge","g5.4xlarge"],"aws-disk":"/dev/sda1:64","aws-spot":"false"}]'
+
+  aws_stop:
+    name: AWS Stop
+    needs: [aws_start]
+    if: always()
+    uses: ./.github/workflows/aws.yml
+    secrets: inherit
+    with:
+      mode: stop
+      runs-on-list: '[{"runs-on":"aws-cuda_${{ github.run_id }}-${{ github.run_attempt }}","aws-ami":"ami-01cb0573cb039ab24","aws-type":["g5.2xlarge","g5.4xlarge"],"aws-disk":"/dev/sda1:64","aws-spot":"false"}]'
