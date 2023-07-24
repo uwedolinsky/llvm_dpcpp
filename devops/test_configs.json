@@ -122,7 +122,7 @@
         "cuda"
       ],
       "image": "${{ inputs.cuda_image }}",
-      "container_options": "--gpus all",
+      "container_options": "-u 1001 --gpus all --cap-add SYS_ADMIN",
       "sycl_device_filter": "ext_oneapi_cuda:gpu",
       "cmake_args": "-DDPCPP_TARGET_TRIPLES=nvptx64-nvidia-cuda"
     }
