@@ -106,6 +106,12 @@ on:
           - cts
           - e2e
 
+      extra_cmake_args:
+        type: choice
+        options:
+          - '-DDPCPP_TARGET_TRIPLES=nvptx64-nvidia-cuda'
+          - ''
+
       env:
         description: |
           Suggested variables: for E2E tests - LIT_FILTER, LIT_FILTER_OUT.
@@ -115,8 +121,7 @@ on:
           test_all executable.
 
           Format: '{"VAR1":"VAL1","VAR2":"VAL2",...}'
-        default: '{"CTS_TEST_ARGS":"--list-tests"}'
-        # default: '{"LIT_FILTER":"GroupAlgorithm"}'
+        default: '{}'
 
       install_drivers:
         type: choice
