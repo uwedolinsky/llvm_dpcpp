@@ -72,6 +72,7 @@ on:
       runner:
         type: choice
         options:
+          - '["cuda"]'
           - '["Linux", "gen12"]'
           - '["amdgpu"]'
       image:
@@ -79,18 +80,20 @@ on:
           Use option ending with ":build" for AMDGPU, ":latest" for the rest.
         type: choice
         options:
-          - 'ghcr.io/intel/llvm/sycl_ubuntu2204_nightly:latest'
           - 'ghcr.io/intel/llvm/sycl_ubuntu2204_nightly:build'
+          - 'ghcr.io/intel/llvm/sycl_ubuntu2204_nightly:latest'
       image_options:
         description: |
           Use option with "--device=/dev/kfd" for AMDGPU, without it for the rest.
         type: choice
         options:
+          - '-u 1001 --gpus all --cap-add SYS_ADMIN'
           - '-u 1001 --device=/dev/dri --privileged --cap-add SYS_ADMIN'
           - '-u 1001 --device=/dev/dri --device=/dev/kfd --privileged --cap-add SYS_ADMIN'
       target_devices:
         type: choice
         options:
+          - 'ext_oneapi_cuda:gpu'
           - 'opencl:cpu'
           - 'opencl:gpu'
           - 'opencl:acc'
@@ -100,8 +103,8 @@ on:
       tests_selector:
         type: choice
         options:
-          - e2e
           - cts
+          - e2e
 
       env:
         description: |
@@ -112,7 +115,8 @@ on:
           test_all executable.
 
           Format: '{"VAR1":"VAL1","VAR2":"VAL2",...}'
-        default: '{}'
+        default: '{"CTS_TEST_ARGS":"--list-tests"}'
+        # default: '{"LIT_FILTER":"GroupAlgorithm"}'
 
       install_drivers:
         type: choice
