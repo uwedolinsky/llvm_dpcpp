@@ -14,20 +14,31 @@ on:
         type: string
         required: true
 
+    outputs:
+      label:
+        description: |
+          In start mode, return 'runs-on' value from the input runs-on-list. We only
+          support scenario where a single runner is created.
+        value: ${{ jobs.aws.outputs.label }}
+
 jobs:
   aws:
     runs-on: ubuntu-20.04
     environment: aws
+    outputs:
+      label: ${{ steps.aws-ec2.outputs.label }}
+
     steps:
+      - uses: actions/checkout@v3
+        with:
+          sparse-checkout: |
+            devops/actions/aws-ec2
       - name: Setup script
         run: |
-          mkdir -p ./aws-ec2
-          wget raw.githubusercontent.com/intel/llvm/sycl/devops/actions/aws-ec2/action.yml   -P ./aws-ec2
-          wget raw.githubusercontent.com/intel/llvm/sycl/devops/actions/aws-ec2/aws-ec2.js   -P ./aws-ec2
-          wget raw.githubusercontent.com/intel/llvm/sycl/devops/actions/aws-ec2/package.json -P ./aws-ec2
-          npm install ./aws-ec2
+          npm install ./devops/actions/aws-ec2
       - name: Start AWS EC2 runners
-        uses: ./aws-ec2
+        id: aws-ec2
+        uses: ./devops/actions/aws-ec2
         with:
           mode: ${{ inputs.mode }}
           runs-on-list: ${{ inputs.runs-on-list }}

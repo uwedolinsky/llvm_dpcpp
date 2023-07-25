@@ -216,6 +216,9 @@ async function stop(param_label) {
       for (let c of runs_on_list) {
         const raw_label = c["runs-on"];
         if (c["aws-type"]) {
+          core.info('Setting label to ${raw_label}');
+          core.warning('Setting label to ${raw_label}');
+          core.setOutput("label", raw_label);
           await start(c["aws-type"], raw_label, c["aws-ami"], c["aws-spot"], c["aws-disk"], c["aws-timebomb"], c["one-job"]);
         } else core.info(`Skipping ${raw_label} config`);
       }
