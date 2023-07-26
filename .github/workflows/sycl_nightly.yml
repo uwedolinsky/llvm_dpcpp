@@ -6,17 +6,9 @@ on:
     - cron: '0 3 * * *'
 
 jobs:
-  test_matrix:
-    if: github.repository == 'intel/llvm'
-    name: Generate Test Matrix
-    uses: ./.github/workflows/sycl_gen_test_matrix.yml
-    with:
-      lts_config: "hip_amdgpu;ocl_gen12;ocl_x64;l0_gen12;esimd_emu;cuda_aws;win_l0_gen12"
-
   ubuntu2204_build_test:
     if: github.repository == 'intel/llvm'
     uses: ./.github/workflows/sycl_linux_build_and_test.yml
-    needs: test_matrix
     secrets: inherit
     with:
       build_cache_root: "/__w/"
@@ -24,13 +16,11 @@ jobs:
       build_configure_extra_args: '--hip --cuda --enable-esimd-emulator'
       merge_ref: ''
       retention-days: 90
-      lts_matrix: ${{ needs.test_matrix.outputs.lts_lx_matrix }}
-      lts_aws_matrix: ${{ needs.test_matrix.outputs.lts_aws_matrix }}
+      lts_config: "hip_amdgpu;ocl_gen12;ocl_x64;l0_gen12;esimd_emu;cuda_aws"
 
   ubuntu2204_opaque_pointers_build_test:
     if: github.repository == 'intel/llvm'
     uses: ./.github/workflows/sycl_linux_build_and_test.yml
-    needs: test_matrix
     secrets: inherit
     with:
       build_cache_root: "/__w/"
@@ -39,6 +29,12 @@ jobs:
       build_configure_extra_args: "--hip --cuda --enable-esimd-emulator --cmake-opt=-DSPIRV_ENABLE_OPAQUE_POINTERS=TRUE"
       merge_ref: ''
 
+  test_matrix:
+    if: github.repository == 'intel/llvm'
+    name: Generate Test Matrix
+    uses: ./.github/workflows/sycl_gen_test_matrix.yml
+    with:
+      lts_config: "win_l0_gen12"
   windows_default:
     name: Windows
     if: github.repository == 'intel/llvm'

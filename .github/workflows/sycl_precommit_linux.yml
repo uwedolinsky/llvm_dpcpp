@@ -59,23 +59,11 @@ jobs:
       with:
         path: src
 
-  # This job generates matrix of tests for SYCL End-to-End tests
-  test_matrix:
-    needs: [detect_changes]
-    if: |
-      github.event.pull_request.head.repo.full_name == 'intel/llvm' ||
-      !contains(needs.detect_changes.outputs.filters, 'ci')
-    name: Generate Test Matrix
-    uses: ./.github/workflows/sycl_gen_test_matrix.yml
-    with:
-      ref: ${{ github.event.pull_request.head.sha }}
-      lts_config: "hip_amdgpu;lin_intel;esimd_emu;cuda_aws"
-
   linux_default:
     name: Linux
     # Only build and test patches, that have passed all linter checks, because
     # the next commit is likely to be a follow-up on that job.
-    needs: [lint, test_matrix, detect_changes]
+    needs: [lint, detect_changes]
     if: |
       always()
       && (success() || contains(github.event.pull_request.labels.*.name, 'ignore-lint'))
@@ -89,6 +77,5 @@ jobs:
       build_cache_root: "/__w/"
       build_artifact_suffix: "default"
       build_cache_suffix: "default"
-      lts_matrix: ${{ needs.test_matrix.outputs.lts_lx_matrix }}
-      lts_aws_matrix: ${{ needs.test_matrix.outputs.lts_aws_matrix }}
+      lts_config: "hip_amdgpu;lin_intel;esimd_emu;cuda_aws"
       changes: ${{ needs.detect_changes.outputs.filters }}
